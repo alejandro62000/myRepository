@@ -75,7 +75,7 @@
 		</globalVariable>
 		<globalVariable>
 			<name>//ACMEAppModule//maCondition3</name>
-			<value>DevProfil</value>
+			<value>CaMarcheEnDev</value>
 			<deploymentSettable>false</deploymentSettable>
 			<serviceSettable>false</serviceSettable>
 			<type>String</type>
