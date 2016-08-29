@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="monProjet" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="compile">
+	
+	<!-- Load config variables.
+	@param appConfigFile
+		File containing all application variables like URL, db user...
+	@param infraConfigFile
+		File containing all infra variables like passwords, jar's path, tibco domain...  
+	-->
+	<property file="${appConfigFile}" /> 
+	<property file="${infraConfigFile}" /> 	
+
+	<!-- maven-ant-tasks reference.
+	@param ant.maven_ant_tasks
+		Link to the maven-ant-tasks's jar
+	-->
+	<path id="maven-ant-tasks.classpath" path="${ant.maven_ant_tasks}" />  
+	<typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+			uri="antlib:org.apache.maven.artifact.ant"
+			classpathref="maven-ant-tasks.classpath" />
+
+	<!-- Runs MVN clean, which delete EAR folder. Uses the master_pom.xml which build the EAR.
+	The master_pom.xml has to be contained into the BW application, near the pom.xml
+	@param mvn.home 
+		Maven install directory.
+	-->
+	<target name="clean" >
+		<artifact:mvn mavenHome="${mvn.home}" fork="true" failonerror="true" >
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory" />
+			<arg value="-f"/>
+			<arg value="master_pom.xml"/>
+			
+			<arg value="clean"/>
+		</artifact:mvn>
+	</target>
+
+	<!-- Runs MVN Install, which build EAR file.
+	@param mvn.home 
+		Maven install directory.
+	-->
+	<target name="compile"  depends="clean" >
+		<artifact:mvn mavenHome="${mvn.home}" fork="true" failonerror="true">
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory" />
+			<arg value="-f"/>
+			<arg value="master_pom.xml"/>
+			
+			<arg value="install"/>
+		</artifact:mvn>
+	</target>
+</project>	

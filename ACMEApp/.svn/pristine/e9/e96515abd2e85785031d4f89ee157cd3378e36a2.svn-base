@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="monProjet" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="deploy">
+
+
+	
+	<!-- Fichier contennant toutes les variables.C'est le seul paramètre à passer en ligne de commande. 
+	--> 	
+	<property file="${configFile}" />   
+
+	<!-- ajout de XMLTask
+	@param ant.xmltask
+		Chemin vers le jar de xmltask
+	-->
+	<taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" > 
+		<classpath>
+			<pathelement location="${ant.xmltask}" />
+		</classpath>
+	</taskdef>
+
+	<!-- ajout de antContrib
+	@param ant.ant_contrib
+		Chemin vers le jar de ant-contrib
+	-->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${ant.ant_contrib}" />
+		</classpath>
+	</taskdef>
+	
+	<!-- Extraction des fichiers de profile de configuration *.substvar depuis l'EAR (unzip)
+	@param domain
+		Domaine dans lequel l'EAR sera déployé
+	@param ear.dir 
+		Répertoire dans lequel l'EAR se trouve
+	-->
+	<target name="extract" >
+	    <echo> ${basedir} et ${ear.dir} et ${ear.name} </echo>
+		<unzip src="${basedir}/${ear.dir}/${ear.name}" dest="${basedir}/${ear.dir}">
+			<patternset>
+				<include name="*/*.substvar"/>
+			</patternset>
+			<mapper type="flatten"/>
+		</unzip>
+	</target>
+
+	<!-- Chargement d'un fichier de configuation en fonction de la variable -DmyEnv passée en paramètre 
+	Les variables du fichier default.substvar sont remplacées par celle du fichier de configuration.
+	Toutes les variables du fichier de config doivent correspondre aux nom de variables dans l'EAR sinon erreur
+		Gérer et afficher l'excpetion ????
+	@Algo : 
+	pour chaque variable dans le fichier, exécuter la commande replace
+	@param ear.dir 
+		Répertoire dans lequel l'EAR se trouve
+	-->
+	<target name="config" depends="extract" >  
+		<echo>Chargement des variables ear.profile.* dans  fichier ${configFile}, remplacement des variables suivantes : </echo>
+		<local name="_propertyList"/>
+		<propertyselector property="_propertyList" delimiter="," select="\1" match="ear\.profile*\.([^\.]*)\.*" casesensitive="true" distinct="true"/>
+		<for list="${_propertyList}" param="sequence">               
+			<sequential>			
+				<echo> @{sequence} =  ${ear.profile.@{sequence}} </echo> 
+				<xmltask source="${basedir}/${ear.dir}/default.substvar" dest="${basedir}/${ear.dir}/default.substvar" failWithoutMatch="true" >
+					<replace 
+							path="/*[local-name()='repository']/*[local-name()='globalVariables']/*[local-name()='globalVariable'][*[local-name()='name']/text()[contains(.,'@{sequence}')]]/*[local-name()='value']/text()"
+							withText="${ear.profile.@{sequence}} " />
+				</xmltask>
+			</sequential>               
+		</for>     
+	</target> 
+
+	<!-- Upload de l'EAR dans le domaine
+	@param domain
+		Domaine dans lequel l'EAR sera uploadée
+	@param ear.dir 
+		Répertoire dans lequel l'EAR se trouve
+	@param ear.name
+		Nom de l'EAR
+	-->
+	<target name="upload" depends="config" >
+		<exec executable="bwadmin" failonerror="true">
+			<arg value="upload"/>
+
+			<arg value="-d"/>
+			<arg value="${domain}"/>
+
+			<arg value="-r"/>
+
+			<arg value="${basedir}/${ear.dir}/${ear.name}"/>
+		</exec>
+		<echo>Upload successful</echo>
+	</target>
+
+	<!-- Upload de l'EAR dans l'agent BW, le nom du profil default.substvar est utilisé en dur
+	@param domain
+		Domaine dans lequel l'EAR sera déployé.
+	@param appspace
+		Appspace dans lequel l'EAR sera déployé.
+	@param ear.dir 
+		Répertoire dans lequel l'EAR se trouve.
+	@param ear.name
+		Nom de l'EAR.
+	 -->
+	<target name="deploy" depends="upload" >
+		<exec executable="bwadmin" failonerror="true">
+			<arg value="deploy"/>
+
+			<arg value="-a"/>
+			<arg value="${appspace}"/>
+
+			<arg value="-d"/>
+			<arg value="${domain}"/>
+
+			<arg value="-pf"/>		
+			<arg value="${basedir}/${ear.dir}/default.substvar"/>	
+
+			<arg value="-r"/>
+
+			<arg value="${basedir}/${ear.dir}/${ear.name}"/>
+		</exec>	
+		<echo>Deploy successful</echo>
+	</target>
+	
+	<!-- test
+	--> 
+	<target name="test" >  
+		<local name="propertyList"/>	
+		<propertyselector property="propertyList" delimiter="," select="\0" match=".*\.([^\.]*)\.*" casesensitive="true" distinct="true"/>      
+		<for list="${propertyList}" param="sequence">               
+			<sequential>
+				<echo> @{sequence} =  ${@{sequence}} </echo> 
+			</sequential>               
+		</for>          
+	</target> 
+	
+</project>	

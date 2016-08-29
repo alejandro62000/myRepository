@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="monProjet" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="deploy">
+
+	<!-- Load config variables.
+	@param appConfigFile
+		File containing all application variables like URL, db user...
+	@param infraConfigFile
+		File containing all infra variables like passwords, jar's path...  
+	-->
+	<property file="${appConfigFile}" /> 
+	<property file="${infraConfigFile}" />  	
+
+	<!-- XMLTask reference
+	@param ant.xmltask
+		Path to xmltask's jar
+	-->
+	<taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" > 
+		<classpath>
+			<pathelement location="${ant.xmltask}" />
+		</classpath>
+	</taskdef>
+
+	<!-- antContrib reference
+	@param ant.ant_contrib
+		Path to ant-contrib's jar
+	-->
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${ant.ant_contrib}" />
+		</classpath>
+	</taskdef>
+
+	<!-- Call ant target to start SQL and JMS scripts deployment
+	@param workspace
+		Directory of the Jenkins's workspace
+	@param dir.scripts.jms
+		Relative path to the JMS scripts directory
+	@param dir.scripts.sql
+		Relative path to the SQL scripts directory
+	-->
+	<target name="scriptsDeployment" >
+		<echo> Deployment of jms scripts</echo>
+		<antcall target="executeScriptsInFolder">
+			<param name="_myScriptFolder" value="${workspace}/${dir.scripts.jms}"/>
+		</antcall>
+		<echo> Deployment of sql scripts</echo>
+		<antcall target="executeScriptsInFolder">
+			<param name="_myScriptFolder" value="${workspace}/${dir.scripts.sql}"/>
+		</antcall>
+		<!-- rajouter ici l'exécution de tache Ant, la variable et les commentaires -->
+	</target>
+
+
+	<!-- Extracting file configuration profile *.substvar from the EAR 
+	@param ear.dir 
+		EAR path.
+	@param ear.name
+		EAR name.
+	-->
+	<target name="extract" depends="scriptsDeployment" >
+		<echo> ${basedir} et ${ear.dir} et ${ear.name} </echo>
+		<unzip src="${ear.dir}/${ear.name}" dest="${ear.dir}">
+			<patternset>
+				<!-- <include name="*/*.substvar"/> -->
+				<include name="*/${ear.config}"/>
+			</patternset>
+			<mapper type="flatten"/>
+		</unzip>
+	</target>
+
+	<!-- Substitute variables from the EAR by the variables in the external configuration file.
+	If a variable in the configuration file doesn't exists in the EAR, an error will occur.
+
+	
+	Les variables du fichier default.substvar sont remplacées par celle du fichier de configuration.
+	==> il faut changer ça et utiliser les profil nommés
+	
+	@param ear.dir 
+		EAR directory.
+	@param nom du profil ?? 
+	-->
+	<target name="config" depends="extract" >  
+		<echo>Chargement des variables ear.profile.* dans  fichier ${configFile}, remplacement des variables suivantes : </echo>
+		<local name="_propertyList"/>
+		<propertyselector property="_propertyList" delimiter="," select="\1" match="ear\.profile*\.([^\.]*)\.*" casesensitive="true" distinct="true"/>
+		<!-- foreach variable in the external file, replace the <value> where there is a name match -->
+		<for list="${_propertyList}" param="sequence">               
+			<sequential>			
+				<echo> @{sequence} =  ${ear.profile.@{sequence}} </echo> 
+				<xmltask source="${ear.dir}/${ear.config}" dest="${ear.dir}/${ear.config}" failWithoutMatch="true" >
+					<replace 
+							path="/*[local-name()='repository']/*[local-name()='globalVariables']/*[local-name()='globalVariable'][*[local-name()='name']/text()[contains(.,'@{sequence}')]]/*[local-name()='value']/text()"
+							withText="${ear.profile.@{sequence}} " />
+				</xmltask>
+			</sequential>               
+		</for>     
+	</target> 
+
+	<!-- Upload an EAR to a domain
+	@param domain
+		Domain space in which the EAR will be upload.
+	@param ear.dir 
+		EAR directory.
+	@param ear.name
+		EAR name.
+	-->
+	<target name="upload" depends="config" >
+		<exec executable="bwadmin" failonerror="true">
+			<arg value="upload"/>
+
+			<arg value="-d"/>
+			<arg value="${domain}"/>
+
+			<arg value="-r"/>
+
+			<arg value="${ear.dir}/${ear.name}"/>
+		</exec>
+		<echo>Upload successful</echo>
+	</target>
+
+	<!-- Deploy an EAR to an appsace
+	le nom du profil default.substvar est utilisé en dur
+		le nom du profil default.substvar est utilisé en dur
+	@param domain
+		Domain space in which the EAR will be deployed.
+	@param appspace
+		Appspace in which the EAR will be deployed.
+	@param ear.dir 
+		EAR directory.
+	@param ear.name
+		EAR name.
+	@param ear.config 
+		EAR variable configuration file.
+	 -->
+	<target name="deploy" depends="upload" >
+		<exec executable="bwadmin" failonerror="true">
+			<arg value="deploy"/>
+
+			<arg value="-a"/>
+			<arg value="${appspace}"/>
+
+			<arg value="-d"/>
+			<arg value="${domain}"/>
+
+			<arg value="-pf"/>		
+			<arg value="${ear.dir}/${ear.config}"/>	
+
+			<arg value="-r"/>
+
+			<arg value="${ear.name}"/>
+		</exec>	
+		<echo>Deploy successful</echo>
+	</target>
+
+	<!-- For each file in a directory 	
+	@param dir.scripts.sql
+		Répertoire des scripts SQL
+	Algo : 
+		pour chaque script, dans l'ordre alpha, je regarde le nom du fichier
+			si script réentrant
+				exécution du script
+			sinon si absence d'un flag d'exécution 
+				création du flag ${dir.flag}/${file}.flag
+				exécution du script					
+			sinon 
+				fin, pas d'exécution	
+
+	Je gère nativement JMS/SQL
+	Je laisse la possibilité d'exécuter une tâche ANT pour le reste ; par exemple déployer un fichier de configuration
+	
+	Refuser les scripts/faire une erreur/alerter s'ils ne matchent pas la norme imposée?
+	 -->
+	<target name="executeScriptsInFolder" >  
+		<for param="fileLong">
+			<path>
+				<sort>
+					<name />			 
+					<fileset dir="${_myScriptFolder}"/>
+				</sort>
+			</path>
+			<sequential>
+				<local name="file"/>
+				<propertyregex property="file" input="@{fileLong}" regexp="([^\\\/]*)$" select="\1" />
+				<if>	
+					<available file="${dir.flag}/${file}.flag"/>
+					<then>	
+						<!-- if the flag file already exists, it means the script has already been executed. -->
+						<echo>---------- [SKIPPED] ${file} already executed </echo>
+					</then>
+					<else>
+						<!-- else, the flag is created then the script is ran -->
+						<echo>---------- [EXECUTION] ${file} </echo>
+						<touch file="${dir.flag}/${file}.flag" />
+						<antcall target="executeScript">
+							<param name="_myScript" value="@{fileLong}"/>
+						</antcall>					
+					</else>
+				</if>
+			</sequential>
+		</for>
+	</target>
+
+	<!-- Call a maven target depending of _myScript suffix : .sql or .jms
+	@param _myScript
+		Script to run as SQL or JMS depending of its extension .sql/jms.
+	-->
+	<target name="executeScript" >  
+		<if>
+			<matches pattern=".jms$" string="${_myScript}"/>
+			<then>
+				<antcall target="executeJmsScript">
+					<param name="_myJmsScript" value="${_myScript}"/>
+				</antcall>
+			</then>
+			<else>
+				<antcall target="executeSqlScript">
+					<param name="_mySqlScript" value="${_myScript}"/>
+				</antcall>
+			</else>
+		</if>
+	</target>
+
+	<!-- Run a SQL script on a DataBase.
+	@param _mySqlScript
+		SQL script to execute.
+	@param db.classpath
+		Classpath of the DB driver.
+	@param db.driver
+		Path to the DB driver.
+	@param db.url 
+		DB url.
+	@param db.user
+		DB user.
+	@param db.password 
+		DB user's password.
+	-->
+	<target name="executeSqlScript" >  
+		<sql	classpath="${db.classpath}"
+				driver="${db.driver}"
+				url="${db.url}" 
+				userid="${db.user}" 
+				password="${db.password}"
+				src="${_mySqlScript}"
+				/>
+	</target>
+
+	<!-- Run a JMS script on an EMS server.
+	@param _myJmsScript
+		JMS script to execute.
+	@param ems.server
+		EMS server adress.
+	@param ems.user
+		EMS server user.
+	@param ems.password
+		EMS server user's password.
+	-->
+	<target name="executeJmsScript" >
+		<echo> Script JMS ${_myJmsScript} execute avec succès</echo>
+		<exec executable="tibemsadmin" failonerror="true">
+			<arg value="-server"/>
+			<arg value="${ems.server}"/>
+
+			<arg value="-user"/>
+			<arg value="${ems.user}"/>
+
+			<arg value="-password"/>		
+			<arg value="${ems.password}"/>	
+
+			<arg value="-script"/>
+			<arg value="${_myJmsScript}"/>
+		</exec>	
+	</target>
+
+	<!-- coder l'exécution d'une tâche ant -->
+	<target name="executeAntScript" >
+		<!-- not yet implemented -->
+	</target>
+
+</project>	

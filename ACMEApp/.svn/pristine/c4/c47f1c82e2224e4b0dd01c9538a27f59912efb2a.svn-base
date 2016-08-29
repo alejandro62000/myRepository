@@ -1,0 +1,21 @@
+#Ne pas utiliser de \ même sur windows !
+
+
+# Directory on which the EAR is build
+ear.dir=ACMEApp/ACMEApp/target
+# EAR Name
+ear.name=ACMEApp_1.0.0.ear
+# Name of the tibco profile properties file
+#ear.config.file=dev
+ear.application.name=ACMEApp
+ear.application.version=1.0
+
+master_pom.dir=ACMEApp/ACMEApp
+
+# Relative path to the script folder from the workspace directory
+scripts.sql.dir=ACMEApp/ACMEAppModule/scripts_sql
+scripts.jms.dir=ACMEApp/ACMEAppModule/scripts_jms
+# Ant external script
+script.ant.file=ACMEApp/ACMEAppModule/scripts_ant/monScriptAnt.xml
+
+#no variables should be there

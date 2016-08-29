@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="monProjet" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="compile">
+	
+	<!-- Load config variables.
+	@param appConfigFile
+		File containing all application variables like URL, db user...
+	@param infraConfigFile
+		File containing all infra variables like passwords, jar's path...  
+	-->
+	<property file="${appConfigFile}" /> 
+	<property file="${infraConfigFile}" /> 	
+
+	<!-- ajout de maven-ant-tasks
+	@param ant.maven_ant_tasks
+		Link to the maven-ant-tasks's jar
+	-->
+	<path id="maven-ant-tasks.classpath" path="${ant.maven_ant_tasks}" />  
+	<typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+			uri="antlib:org.apache.maven.artifact.ant"
+			classpathref="maven-ant-tasks.classpath" />
+
+	<!-- Exécution du MVN clean, qui va supprimer et recréer le répertoire de l'EAR.
+	Utilisation du master_pom qui va packager les 3 projets.
+	@param mvn.home 
+		Maven install directory
+	-->
+	<target name="clean" >
+		<artifact:mvn mavenHome="${mvn.home}" fork="true" failonerror="true" >
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory" />
+			<arg value="-f"/>
+			<arg value="master_pom.xml"/>
+			<arg value="clean"/>
+		</artifact:mvn>
+	</target>
+
+	<!-- Exécution du MVN Install, dépend du MVN clean 
+	@param mvn.home 
+		Répertoire de l'installation Maven 
+	-->
+	<target name="compile"  depends="clean" >
+		<artifact:mvn mavenHome="${mvn.home}" fork="true" failonerror="true">
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory" />
+			<arg value="-f"/>
+			<arg value="master_pom.xml"/>
+			<arg value="install"/>
+		</artifact:mvn>
+	</target>
+</project>	
