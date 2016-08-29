@@ -1,0 +1,12 @@
+bin.includes = .,\
+               .WebResources/,\
+               .settings/,\
+               META-INF/,\
+               Policies/,\
+               Processes/,\
+               Resources/,\
+               Schemas/,\
+               Service Descriptors/,\
+               target/,\
+               pom.xml,\
+               pom.xml.svntmp

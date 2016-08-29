@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="monProjet" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="test">
+	<target name="test" >
+		<echo>Mon script ant exterieur ! Hello world , basedir = ${basedir}</echo>
+	</target>
+</project>	

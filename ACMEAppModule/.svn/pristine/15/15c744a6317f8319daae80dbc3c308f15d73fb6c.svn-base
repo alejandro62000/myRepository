@@ -1,0 +1,13 @@
+bin.includes = .,\
+               .WebResources/,\
+               .settings/,\
+               META-INF/,\
+               Policies/,\
+               Processes/,\
+               Resources/,\
+               Schemas/,\
+               Service Descriptors/,\
+               pom.xml,\
+               scripts_sql/,\
+               scripts_jms/,\
+               script_ant/

@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: ACMEShared
+TIBCO-BW-SharedModule: META-INF/module.bwm
+Bundle-ManifestVersion: 2
+Bundle-Vendor: TIBCO Software Inc.
+TIBCO-BW-ModuleSharedVariables: META-INF/module.msv
+Require-Capability: com.tibco.bw.model; filter:="(name=bwext)",com.tib
+ co.bw.sharedresource.model; filter:="(name=bw.httpclient)",com.tibco.
+ bw.sharedresource.model; filter:="(name=bw.httpconnector)",com.tibco.
+ bw.sharedresource.model; filter:="(name=bw.jdbc)",com.tibco.bw.shared
+ resource.model; filter:="(name=bw.jmsconnection)",com.tibco.bw.shared
+ resource.model; filter:="(name=bw.jndiconfiguration)"
+TIBCO-BW-ConfigProfile: META-INF/default.substvar
+TIBCO-BW-Version: 6.3.2 HF1 V36 2016-05-27
+Provide-Capability: com.tibco.bw.module; name="ACMEShared"; version:Ve
+ rsion="1.0.0",com.tibco.bw.wsdls; ns="http://www.tibco.com/tibedu/ACM
+ EItems",com.tibco.bw.wsdls; ns="http://www.tibco.com/tibedu/ACMEOrder
+ s",com.tibco.bw.schemas; ns="http://www.tibco.com/tibedu/testschema/C
+ ustSchema.xsd",com.tibco.bw.schemas; ns="http://www.tibco.com/schemas
+ /testschemas/Schema.xsd",com.tibco.bw.resources; name="acmeshared"
+Bundle-Name: ACMEShared Module
+Bundle-Version: 1.0.0.201608031455
+Bundle-ClassPath: .
+TIBCO-BW-JobSharedVariables: META-INF/module.jsv
+
