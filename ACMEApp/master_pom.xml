@@ -52,7 +52,7 @@
 					<projectFile>${workspace}/ACMEApp/REST-Project-1-soapui-project.xml</projectFile>
 					<outputFolder></outputFolder>
 					<projectProperties>
-						<value>message=Hello Alexandre, debut des tests</value>
+						<value>message=Hello Alexandre, debut des tests...</value>
 					</projectProperties>
 					<junitReport>true</junitReport>
 					<printReport>true</printReport>
