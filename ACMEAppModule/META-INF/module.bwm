@@ -83,6 +83,7 @@
   <sca:property xmi:id="_wWzKMEy2EeagFZOypaAt8A" name="BW.MODULE.VERSION" type="XMLSchema:string" scalable="true"/>
   <sca:property xmi:id="_wW0_YEy2EeagFZOypaAt8A" name="BW.MODULE.NAME" type="XMLSchema:string" scalable="true"/>
   <sca:property xmi:id="_9SmwUF4wEeaVvIkoxXoauw" name="maCondition3" type="XMLSchema:string" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_O6WaYG9ZEeabS8G85Ga-uQ" name="maCondition1" type="XMLSchema:string" publicAccess="true" scalable="true"/>
   <sca:property xmi:id="_KPgdoGYeEeaZvKqHoZgnSA" name="/newGroup/huh" type="XMLSchema:string" publicAccess="true" scalable="true"/>
   <sca:component xmi:id="_BAx0MEy3EeagFZOypaAt8A" name="ComponentOrderLookup" compositeext:version="1.0.0.qualifier">
     <scaext:implementation xsi:type="BW:BWComponentImplementation" xmi:id="_BAzpYEy3EeagFZOypaAt8A" processName="acmeappmodule.OrderLookup"/>

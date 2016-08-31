@@ -82,6 +82,14 @@
 			<isOverride>true</isOverride>
 		</globalVariable>
 		<globalVariable>
+			<name>//ACMEAppModule//maCondition1</name>
+			<value></value>
+			<deploymentSettable>false</deploymentSettable>
+			<serviceSettable>false</serviceSettable>
+			<type>String</type>
+			<isOverride>false</isOverride>
+		</globalVariable>
+		<globalVariable>
 			<name>//ACMEAppModule///newGroup/huh</name>
 			<value></value>
 			<deploymentSettable>false</deploymentSettable>
