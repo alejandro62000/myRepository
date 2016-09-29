@@ -195,7 +195,7 @@
 		</globalVariable>
 		<globalVariable>
 			<name>//ACMEShared//mot_de_passe</name>
-			<value>gg</value>
+			<value>gggg</value>
 			<deploymentSettable>false</deploymentSettable>
 			<serviceSettable>false</serviceSettable>
 			<type>String</type>
