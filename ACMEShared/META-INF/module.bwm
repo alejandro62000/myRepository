@@ -13,6 +13,7 @@
   <sca:property xmi:id="_UbPHIEzKEeagFZOypaAt8A" name="dbpassword" type="property:password" scaext:simpleValue="#!YCsybnXKwdSdNSvKDi72ZA==" publicAccess="true" scalable="true"/>
   <sca:property xmi:id="_WUcHoEzOEeaQtOqSFR7dBw" name="httpOrdering" type="XMLSchema:int" scaext:simpleValue="" publicAccess="true" scalable="true"/>
   <sca:property xmi:id="_VVNUoE2REeaE6sH00685Dg" name="BW.HOST.NAME1" type="XMLSchema:string" scaext:simpleValue="" publicAccess="true" scalable="true"/>
+  <sca:property xmi:id="_j9yioIY8Eeav05G5QNIOtw" name="mot_de_passe" type="XMLSchema:string" publicAccess="true" scalable="true"/>
   <sca:property xmi:id="_vesYEFS6EeaMCZ08ZXjXYA" name="/monTestGroup/aaaa" type="httpconnector:HttpConnectorConfiguration" scaext:simpleValue="" publicAccess="true" scalable="true"/>
   <sca:property xmi:id="_0Bi4MFS6EeaMCZ08ZXjXYA" name="/monTestGroup/bbbb" type="XMLSchema:string" publicAccess="true" scalable="true"/>
 </sca:composite>

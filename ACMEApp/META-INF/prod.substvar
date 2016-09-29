@@ -194,6 +194,14 @@
 			<isOverride>false</isOverride>
 		</globalVariable>
 		<globalVariable>
+			<name>//ACMEShared//mot_de_passe</name>
+			<value></value>
+			<deploymentSettable>false</deploymentSettable>
+			<serviceSettable>false</serviceSettable>
+			<type>String</type>
+			<isOverride>true</isOverride>
+		</globalVariable>
+		<globalVariable>
 			<name>//ACMEShared///monTestGroup/bbbb</name>
 			<value>bbbbbbb</value>
 			<deploymentSettable>false</deploymentSettable>
